@@ -1,0 +1,45 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: portainer-vs
+  namespace: nginx
+spec:
+  host: portainer.poos.home
+  routes:
+    - path: /
+      route: portainer/portainer-vsr
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: portainer-vsr
+  namespace: portainer
+spec:
+  host: portainer.poos.home
+  upstreams:
+    - name: server
+      service: portainer
+      port: 9000
+  subroutes:
+    - path: /
+      action:
+        pass: server
+
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: portinaer-ingress
+#   namespace: portainer
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - host: portainer.poos.home
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: portainer
+#             port:
+#               number: 8000
