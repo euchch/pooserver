@@ -12,41 +12,41 @@ spec:
     metadata:
       labels:
         app: pihole
-  spec:
-    containers:
-      - name: pihole
-        image: pihole/pihole:2021.10
-        ports:
-          - containerPort: 53
-            protocol: TCP
-          - containerPort: 53
-            protocol: UDP
-          - containerPort: 67
-            protocol: UDP
-          - containerPort: 80
-            protocol: TCP
-          - containerPort: 443
-            protocol: TCP
-        env:
-          - name: TZ
-            value: "America/New_York"
-          - name: WEBPASSWORD
-            value: secret
-          - name: WEBPASSWORD
-            value: secret
-          - name: DNS1
-            value: 1.1.1.1
-          - name: DNS2
-            value: no
-          - name: VIRTUAL_HOST
-            value: pi.hole
-        resources:
-          requests:
-            memory: 128Mi
-            cpu: 100m
-          limits:
-            memory: 512Mi
-            cpu: 1
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:2021.10
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 67
+              protocol: UDP
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 443
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "America/New_York"
+            - name: WEBPASSWORD
+              value: secret
+            - name: WEBPASSWORD
+              value: secret
+            - name: DNS1
+              value: 1.1.1.1
+            - name: DNS2
+              value: no
+            - name: VIRTUAL_HOST
+              value: pi.hole
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 1
 
 
   #     volumeMounts:
