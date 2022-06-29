@@ -1,0 +1,6 @@
+# Setup pihole folders
+    mkdir /server
+    mkdir /server/data
+    mkdir /server/data/pihole
+    mkdir /server/data/pihole/{etc,dnsmasq.d}
+    chmod go+r /server/data/pihole/{etc,dnsmasq.d}
