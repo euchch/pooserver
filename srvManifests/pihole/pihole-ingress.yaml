@@ -1,0 +1,27 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: pihole-vs
+  namespace: nginx
+spec:
+  host: pihole.poos.home
+  routes:
+    - path: /
+      route: pihole/pihole-vsr
+
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: pihole-vsr 
+  namespace: pihole
+spec:
+  host: pihole.poos.home
+  upstreams:
+    - name: pihole 
+      service: pihole-svc
+      port: 80
+  subroutes:
+    - path: /
+      action:
+        pass: pihole

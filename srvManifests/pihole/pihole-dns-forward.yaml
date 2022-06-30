@@ -1,0 +1,70 @@
+# apiVersion: k8s.nginx.org/v1alpha1
+# kind: GlobalConfiguration 
+# metadata:
+#   name: nginx-configuration
+#   namespace: nginx
+# spec:
+#   listeners:
+#   - name: dns-udp
+#     port: 53
+#     protocol: UDP
+#   - name: dns-tcp
+#     port: 53
+#     protocol: TCP
+
+---
+apiVersion: k8s.nginx.org/v1alpha1
+kind: TransportServer
+metadata:
+  name: pihole-tcp
+  namespace: pihole
+spec:
+  listener:
+    name: pihole-tcp 
+    protocol: TCP
+  upstreams:
+    - name: dns-app
+      service: pihole-svc
+      port: 53
+  action:
+    pass: dns-app
+
+---
+apiVersion: k8s.nginx.org/v1alpha1
+kind: TransportServer
+metadata:
+  name: pihole-udp
+  namespace: pihole
+spec:
+  listener:
+    name: pihole-udp 
+    protocol: UDP 
+  upstreams:
+    - name: dns-app
+      service: pihole-svc
+      port: 53
+  upstreamParameters:
+    udpRequests: 1
+    udpResponses: 1
+  action:
+    pass: dns-app
+
+---
+apiVersion: k8s.nginx.org/v1alpha1
+kind: TransportServer
+metadata:
+  name: pihole-uudp
+  namespace: pihole
+spec:
+  listener:
+    name: pihole-uudp 
+    protocol: UDP 
+  upstreams:
+    - name: dns-app
+      service: pihole-svc
+      port: 5353
+  upstreamParameters:
+    udpRequests: 1
+    udpResponses: 1
+  action:
+    pass: dns-app
