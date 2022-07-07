@@ -18,9 +18,9 @@ spec:
           image: "pihole/pihole:2021.10"
           ports:
             - containerPort: 53
-              protocol: "TCP"
-            - containerPort: 53
               protocol: "UDP"
+            - containerPort: 53
+              protocol: "TCP"
             - containerPort: 67
               protocol: "UDP"
             - containerPort: 80
@@ -76,15 +76,15 @@ spec:
       name: "http"
     - port: 53
       targetPort: 53
+      protocol: "TCP"
+      name: "dnst"
+    - port: 53
+      targetPort: 53
       protocol: "UDP"
       name: "dnsu"
     - port: 5353
       targetPort: 53
       protocol: "UDP"
       name: "dnsuu"
-    # - port: 53
-    #   targetPort: 53
-    #   protocol: "TCP"
-    #   name: "dnst"
   selector:
     app: "pihole"
