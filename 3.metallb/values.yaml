@@ -1,6 +1,5 @@
-configInline:
-  address-pools:
-    - name: default
-      protocol: layer2
-      addresses:
+addresspools:
+  - name: default
+    autoassign: true
+    addresses:
       - 192.168.1.250-192.168.1.254

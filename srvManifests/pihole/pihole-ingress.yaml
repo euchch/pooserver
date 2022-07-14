@@ -19,7 +19,7 @@ spec:
   host: pihole.poos.home
   upstreams:
     - name: pihole 
-      service: pihole-svc
+      service: pihole-web-svc
       port: 80
   subroutes:
     - path: /

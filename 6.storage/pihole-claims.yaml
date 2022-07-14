@@ -1,0 +1,24 @@
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: pihole-etc
+#   namespace: pihole
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 50Mi
+
+# ---
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: pihole-dnsmasq
+#   namespace: pihole
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 10Mi

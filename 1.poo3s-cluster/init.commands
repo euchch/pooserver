@@ -1,6 +1,36 @@
-# Setup pihole folders
-    mkdir /server
-    mkdir /server/data
-    mkdir /server/data/pihole
-    mkdir /server/data/pihole/{etc,dnsmasq.d}
-    chmod go+r /server/data/pihole/{etc,dnsmasq.d}
+# Install nfs on host:
+    apt-get update
+    apt-get install nfs-common nfs-kernel-server
+    service nfs-common start
+    service nfs-kernel-server start
+    # if NFS service does not start, most likely:
+        ls -lah /lib/systemd/system/nfs-common.service # (should point to /dev/null - rm -f this file)
+        service nfs-common start && service nfs-kernel-server start
+    systemctl daemon-reload
+    systemctl enable nfs-common
+    systemctl enable nfs-kernel-server
+
+# Setup host folders
+    mkdir -p /srv/shared
+
+# Add shared folder to etc/exports:
+    echo "/srv 192.168.1.0/255.255.255.0(rw)" >> /etc/exports
+    exportfs -a
+    systemctl restart nfs-kernel-server
+
+# On clients (unless setting up as startup script in image)
+    apk update
+    apk add nfs-utils
+    rc-update add nfsmount
+    rc-service nfsmount start
+
+    if ! grep -qs '/mnt/srv/shared ' /proc/mounts; then
+        mkdir -p /mnt/srv/shared
+
+        NFS_SERVER=poove1.poos.home
+        NFS_DIR=/srv/shared
+        mount -t nfs ${NFS_SERVER}:${NFS_DIR} /mnt/srv/shared
+        echo "${NFS_SERVER}:${NFS_DIR} /mnt/srv/shared nfs _netdev 0 0" | tee -a /etc/fstab
+    fi
+    chmod +x /mnt/srv/shared/client-bootstrap.sh
+    /mnt/srv/shared/client-bootstrap.sh

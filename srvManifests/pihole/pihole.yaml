@@ -1,18 +1,36 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: "pihole"
   namespace: "pihole"
+  labels:
+    app.kubernetes.io/name: pihole
+    app: pihole
 spec:
+  serviceName: pihole
   replicas: 1
+  updateStrategy:
+    type: OnDelete
   selector:
     matchLabels:
-      app: "pihole"
+      app.kubernetes.io/name: pihole
+      app: pihole
   template:
     metadata:
       labels:
-        app: "pihole"
+        app.kubernetes.io/name: pihole
+        app: pihole
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - pihole
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - name: "pihole"
           image: "pihole/pihole:2021.10"
@@ -29,13 +47,25 @@ spec:
               protocol: "TCP"
           env:
             - name:   "TZ"
-              value:  "America/New_York"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: TZ
             - name:   "WEBPASSWORD"
-              value:  "secret"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: WEBPASSWORD
             - name:   "DNS1"
-              value:  "1.1.1.1"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: DNS1
             - name:   "DNS2"
-              value:  "no"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: DNS2
             - name:   "VIRTUAL_HOST"
               value:  "pi.hole"
           resources:
@@ -45,46 +75,25 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "1"
-
-
-  #     volumeMounts:
-  #       - name: etc
-  #         mountPath: /etc/pihole
-  #       - name: dnsmasq
-  #         mountPath: /etc/dnsmasq.d
-  # volumes:
-  #   - name: etc
-  #     hostPath:
-  #       path: /data/pihole/etc
-  #       type: Directory
-  #   - name: dnsmasq
-  #     hostPath:
-  #       path: /data/pihole/dnsmasq.d
-  #       type: Directory
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "pihole-svc"
-  namespace: "pihole"
-spec:
-  ports:
-    - port: 80
-      targetPort: 80
-      protocol: "TCP"
-      name: "http"
-    - port: 53
-      targetPort: 53
-      protocol: "TCP"
-      name: "dnst"
-    - port: 53
-      targetPort: 53
-      protocol: "UDP"
-      name: "dnsu"
-    - port: 5353
-      targetPort: 53
-      protocol: "UDP"
-      name: "dnsuu"
-  selector:
-    app: "pihole"
+          volumeMounts:
+            - name: pihole-etc
+              mountPath: '/etc/pihole'
+            - name: pihole-dnsmasq
+              mountPath: '/etc/dnsmasq.d'
+  volumeClaimTemplates:
+    - metadata:
+        name: pihole-etc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
+    - metadata:
+        name: pihole-dnsmasq
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi

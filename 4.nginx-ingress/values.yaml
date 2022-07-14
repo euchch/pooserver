@@ -3,15 +3,15 @@ controller:
   service:
     loadBalancerIP: "192.168.1.254"
     customPorts:
-      - name: tdns
+      - name: tcp-dns
         port: 53
         protocol: TCP
-      # - name: udns
-      #   port: 53
-      #   protocol: UDP
-      # - name: ddns
-      #   port: 5353
-      #   protocol: UDP
+      - name: udp-dns
+        port: 53
+        protocol: UDP
+      - name: dhcp
+        port: 67
+        protocol: UDP
   rbac:
     create: "true"
   globalConfiguration:
@@ -24,45 +24,6 @@ controller:
         - name: pihole-udp
           port: 53
           protocol: UDP
-        # - name: pihole-uudp
-        #   port: 5353
-        #   protocol: UDP
-        - name: udp-server
-          port: 3334
+        - name: pihole-dhcp
+          port: 67
           protocol: UDP
-        - name: dns-udp
-          port: 5353
-          protocol: UDP
-        - name: dns-tcp
-          port: 5353
-          protocol: TCP
-  config:
-    name: "poonginx-config"
-    entries:
-      stream-snippets: |
-        upstream pihole-tcp {
-            server pihole-svc.pihole.svc.cluster.local:53;
-        }
-        server {
-            listen 53;
-            listen [::]:53;
-            proxy_pass pihole-tcp;
-        }
-        upstream pihole-udp {
-            server pihole-svc.pihole.svc.cluster.local:53;
-        }
-        server {
-            listen 53 udp;
-            listen [::]:53 udp;
-            proxy_pass pihole-udp;
-            proxy_responses 1;
-        }
-        upstream pihole-uudp {
-            server pihole-svc.pihole.svc.cluster.local:5353;
-        }
-        server {
-            listen 5353 udp;
-            listen [::]:5353 udp;
-            proxy_pass pihole-uudp;
-            proxy_responses 1;
-        }
