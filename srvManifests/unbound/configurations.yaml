@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unbounb-cfg
+  namespace: unbound
+  labels:
+    app: unbound
+data:
+  unbound.conf: |-
+    server:
+      verbosity: 0
+      access-control: 10.0.0.0/8 allow
+      access-control: 127.0.0.0/8 allow
+      access-control: 172.16.0.0/12 allow
+      access-control: 192.168.0.0/16 allow
+      interface: 0.0.0.0
+      port: 5053
+      do-ip4: yes
+      do-udp: yes
+      do-tcp: yes
+      do-ip6: no
+      prefer-ip6: no
+      harden-glue: yes
+      harden-dnssec-stripped: yes
+      use-caps-for-id: no
+      edns-buffer-size: 1472
+      prefetch: yes
+      num-threads: 1
+      so-rcvbuf: 1m
+      private-address: 10.0.0.0/8
+      private-address: 169.254.0.0/16
+      private-address: 172.16.0.0/12
+      private-address: 192.168.0.0/16
+      private-address: fd00::/8
+      private-address: fe80::/10
+
+      private-domain: "poos.home"
+      domain-insecure: "poos.home"
+
+      # include: /etc/unbound/a-records.conf
+      # include: /etc/unbound/forward-records.conf
+
+      directory: "/opt/unbound/etc/unbound"
+      interface: 127.0.0.1
+      so-reuseport: yes
+      do-daemonize: no
+      logfile: ""
+      use-syslog: no
+      auto-trust-anchor-file: "var/root.key"
+      # record used for the liveness/readiness probes
+      local-data: "health.check.unbound A 10.10.10.10"
+      local-data-ptr: "10.10.10.10 health.check.unbound"
+
+      stub-zone:
+          name: "home"
+          stub-addr: 192.168.1.254
+          stub-first: yes
+
+    # include: /etc/unbound/local-zone.conf

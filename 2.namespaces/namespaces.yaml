@@ -40,3 +40,12 @@ items:
     spec:
       finalizers:
       - kubernetes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
+        kubernetes.io/metadata.name: unbound
+      name: unbound
+    spec:
+      finalizers:
+      - kubernetes
