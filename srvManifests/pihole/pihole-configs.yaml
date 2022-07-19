@@ -2,8 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pihole-config
+  namespace: pihole
 data:
   WEBPASSWORD: secret
   TZ: 'America/New_York'
-  DNS1: 1.1.1.1
-  DNS2: 1.0.0.1
+  DNS1: '10.43.34.1#5353'
+  DNS2: '10.43.34.1#5353'
+  # DNS2: unbound-dns-svc.unbound.svc.cluster.local

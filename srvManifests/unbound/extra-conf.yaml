@@ -27,5 +27,9 @@ data:
     local-data-ptr: "192.168.1.254 grafana.poos.home"
     local-data-ptr: "192.168.1.1  router.poos.home"
 
+    # record used for the liveness/readiness probes
+    local-data: "health.check.unbound A 10.10.10.10"
+    local-data-ptr: "10.10.10.10 health.check.unbound"
+
   local-zone.conf: |-
     local-zone:  poos.home. static

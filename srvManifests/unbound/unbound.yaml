@@ -10,7 +10,7 @@ spec:
   serviceName: unbound
   replicas: 1
   updateStrategy:
-    type: OnDelete
+    type: RollingUpdate
   selector:
     matchLabels:
       app.kubernetes.io/name: unbound
@@ -35,9 +35,9 @@ spec:
         - name: "unbound"
           image: "mvance/unbound:1.16.1"
           ports:
-            - containerPort: 5353
+            - containerPort: 53
               protocol: "UDP"
-            - containerPort: 5353
+            - containerPort: 53
               protocol: "TCP"
           env:
             - name:   "TZ"
@@ -57,22 +57,22 @@ spec:
             - name: "unbound-extra-conf"
               mountPath: "/etc/unbound"
               readOnly: true
-          # livenessProbe:
-          #   exec:
-          #     command:
-          #       - "nslookup"
-          #       - "health.check.unbound"
-          #       - "127.0.0.1"
-          #   initialDelaySeconds: 10
-          #   timeoutSeconds: 2
-          # readinessProbe:
-          #   exec:
-          #     command:
-          #       - "nslookup"
-          #       - "health.check.unbound"
-          #       - "127.0.0.1"
-          #   initialDelaySeconds: 10
-          #   timeoutSeconds: 2
+          livenessProbe:
+            exec:
+              command:
+                - "drill"
+                - "health.check.unbound"
+                - "@127.0.0.1"
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+          readinessProbe:
+            exec:
+              command:
+                - "drill"
+                - "health.check.unbound"
+                - "@127.0.0.1"
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
       volumes:
         - name: "unbound-conf"
           configMap:

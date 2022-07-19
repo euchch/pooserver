@@ -7,12 +7,13 @@ metadata:
 spec:
   ports:
     - port: 5353
-      targetPort: 5353
+      targetPort: 53
       protocol: "UDP"
       name: "dnsu"
     - port: 5353
-      targetPort: 5353
+      targetPort: 53
       protocol: "TCP"
       name: "dnst"
+  clusterIP: 10.43.34.01
   selector:
     app: "unbound"

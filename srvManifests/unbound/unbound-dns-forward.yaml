@@ -1,0 +1,35 @@
+# apiVersion: k8s.nginx.org/v1alpha1
+# kind: TransportServer
+# metadata:
+#   name: unbound-tcp
+#   namespace: unbound
+# spec:
+#   listener:
+#     name: unbound-tcp 
+#     protocol: TCP
+#   upstreams:
+#     - name: dns-app
+#       service: unbound-dns-svc
+#       port: 5353
+#   action:
+#     pass: dns-app
+
+# ---
+# apiVersion: k8s.nginx.org/v1alpha1
+# kind: TransportServer
+# metadata:
+#   name: unbound-udp
+#   namespace: unbound
+# spec:
+#   listener:
+#     name: unbound-udp
+#     protocol: UDP 
+#   upstreams:
+#     - name: dns-app
+#       service: unbound-dns-svc
+#       port: 5353
+#   upstreamParameters:
+#     udpRequests: 1
+#     udpResponses: 1
+#   action:
+#     pass: dns-app

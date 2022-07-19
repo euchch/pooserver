@@ -8,9 +8,9 @@ metadata:
     app: pihole
 spec:
   serviceName: pihole
-  replicas: 1
+  replicas: 3
   updateStrategy:
-    type: OnDelete
+    type: RollingUpdate
   selector:
     matchLabels:
       app.kubernetes.io/name: pihole
@@ -33,7 +33,8 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
         - name: "pihole"
-          image: "pihole/pihole:2021.10"
+          image: "pihole/pihole:2022.07"
+          imagePullPolicy: Always
           ports:
             - containerPort: 53
               protocol: "UDP"
@@ -80,6 +81,22 @@ spec:
               mountPath: '/etc/pihole'
             - name: pihole-dnsmasq
               mountPath: '/etc/dnsmasq.d'
+          livenessProbe:
+            exec:
+              command:
+                - "nslookup"
+                - "pihole.poos.home"
+                - "127.0.0.1"
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+          readinessProbe:
+            exec:
+              command:
+                - "nslookup"
+                - "pihole.poos.home"
+                - "127.0.0.1"
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
   volumeClaimTemplates:
     - metadata:
         name: pihole-etc
