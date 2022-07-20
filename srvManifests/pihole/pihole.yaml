@@ -8,7 +8,7 @@ metadata:
     app: pihole
 spec:
   serviceName: pihole
-  replicas: 5
+  replicas: 2
   updateStrategy:
     type: RollingUpdate
   selector:
