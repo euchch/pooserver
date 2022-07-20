@@ -54,6 +54,12 @@ data:
         exit
     fi
 
+    # Since new pihole server creates dbs/setting files we have to wait, 
+    # I just don't know WHAT we're waiting for but 30s seems like a sweet spot
+    sleep 30
+    # Forcing WAL to avoid DB lock and paralel write requests
+    sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=WAL;"
+
     sqlite3 /etc/pihole/gravity.db "DELETE FROM adlist"
     sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts', 1, 'default')"
 
@@ -63,5 +69,8 @@ data:
         sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('${my_rec[2]}', ${my_rec[0]}, '${my_rec[1]}')"
     done < $ADLIST_FILE
 
-    pihole -g
+    # Undoing WAL for better performances, not a must so we're good if things crash before this one
+    sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=DELETE;"
+
+    sudo pihole -g
     popd

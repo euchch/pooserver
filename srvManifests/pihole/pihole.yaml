@@ -8,7 +8,7 @@ metadata:
     app: pihole
 spec:
   serviceName: pihole
-  replicas: 1
+  replicas: 5
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -84,29 +84,24 @@ spec:
             - name: "pihole-bootstrap"
               mountPath: "/bootstrap"
               readOnly: true
-          # livenessProbe:
-          #   exec:
-          #     command:
-          #       - "nslookup"
-          #       - "pi.hole"
-          #       - "127.0.0.1"
-          #   initialDelaySeconds: 10
-          #   timeoutSeconds: 2
-          # readinessProbe:
-          #   exec:
-          #     command:
-          #       - "nslookup"
-          #       - "pi.hole"
-          #       - "127.0.0.1"
-          #   initialDelaySeconds: 10
-          #   timeoutSeconds: 2
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 60
+            timeoutSeconds: 2
+          readinessProbe:
+            exec:
+              # Not the BEST way to test it but since jq is not on image, cannot use "pihole -c -j" for actual data
+              command:
+                  - bash
+                  - -c
+                  - "if [ $(sqlite3 /etc/pihole/gravity.db 'select count(*) from gravity;') -le 100 ]; then echo 'Blocked domains count is too low' >&2 && exit 1 ; fi"
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
           lifecycle:
             postStart:
               exec:
-                command: 
-                  - /bootstrap/refresh-ads.sh
-                  - ;
-                  - chown pihole:www-data /etc/pihole/gravity.db
+                command: ["/bin/bash", "-c", "/bootstrap/refresh-ads.sh > /tmp/startup.log"]
       volumes:
         - name: "pihole-bootstrap"
           configMap:

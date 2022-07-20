@@ -8,7 +8,7 @@ metadata:
     app: unbound
 spec:
   serviceName: unbound
-  replicas: 1
+  replicas: 3
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -58,11 +58,8 @@ spec:
               mountPath: "/etc/unbound"
               readOnly: true
           livenessProbe:
-            exec:
-              command:
-                - "drill"
-                - "health.check.unbound"
-                - "@127.0.0.1"
+            tcpSocket:
+              port: 53
             initialDelaySeconds: 10
             timeoutSeconds: 2
           readinessProbe:
@@ -71,7 +68,7 @@ spec:
                 - "drill"
                 - "health.check.unbound"
                 - "@127.0.0.1"
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             timeoutSeconds: 2
       volumes:
         - name: "unbound-conf"
