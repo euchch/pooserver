@@ -9,3 +9,59 @@ data:
   DNS1: '10.43.34.1#5353'
   DNS2: '10.43.34.1#5353'
   # DNS2: unbound-dns-svc.unbound.svc.cluster.local
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-bootstrap
+  namespace: pihole
+  labels:
+    app: pihole
+data:
+  ad.list: |-
+    1,default,https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+    1,porn,https://raw.githubusercontent.com/chadmayfield/pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list
+    1,spam404 main,https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt
+    1,firebog adguard,https://v.firebog.net/hosts/AdguardDNS.txt
+    1,bigdrago main,https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
+    1,SmartTV,https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
+    1,developerdan ads,https://www.github.developerdan.com/hosts/lists/ads-and-tracking-extended.txt
+    1,developerdan aggressive,https://www.github.developerdan.com/hosts/lists/tracking-aggressive-extended.txt
+    1,VeleSila,https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
+    1,quidsup malwares,https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt
+    1,simple_ad,https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+    1,youtubelist,https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/master/youtubelist.txt
+    1,ray adguard,https://raw.githubusercontent.com/r-a-y/mobile-hosts/master/AdguardMobileAds.txt
+    1,anudeepND,https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt
+    1,firebog w3kbl,https://v.firebog.net/hosts/static/w3kbl.txt
+    1,blocklistproject ransomware,https://raw.githubusercontent.com/blocklistproject/Lists/master/ransomware.txt
+    1,RPiList malware,https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/malware
+    1,RPiList phishing,https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/Phishing-Angriffe
+    1,blocklistproject phishing,https://raw.githubusercontent.com/blocklistproject/Lists/master/phishing.txt
+
+  refresh-ads.sh: |-
+    #!/bin/bash
+
+    ADLIST_FILE=/bootstrap/ad.list
+    SOURCE=`dirname ${BASH_SOURCE[0]}`
+    echo "switching to $SOURCE"
+    pushd $SOURCE
+
+    if [ ! -f "$ADLIST_FILE" ]; then
+        echo "$ADLIST_FILE is missing."
+        popd
+        exit
+    fi
+
+    sqlite3 /etc/pihole/gravity.db "DELETE FROM adlist"
+    sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts', 1, 'default')"
+
+    while IFS= read -r line || [[ "$line" ]]; do
+        IFS=',' read -ra my_rec <<< "$line"   # str is read into an array as tokens separated by IFS
+        echo "enabled: ${my_rec[0]}, desc: ${my_rec[1]}, url: ${my_rec[2]}"
+        sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('${my_rec[2]}', ${my_rec[0]}, '${my_rec[1]}')"
+    done < $ADLIST_FILE
+
+    pihole -g
+    popd

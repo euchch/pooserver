@@ -8,7 +8,7 @@ metadata:
     app: pihole
 spec:
   serviceName: pihole
-  replicas: 3
+  replicas: 1
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -81,22 +81,37 @@ spec:
               mountPath: '/etc/pihole'
             - name: pihole-dnsmasq
               mountPath: '/etc/dnsmasq.d'
-          livenessProbe:
-            exec:
-              command:
-                - "nslookup"
-                - "pihole.poos.home"
-                - "127.0.0.1"
-            initialDelaySeconds: 10
-            timeoutSeconds: 2
-          readinessProbe:
-            exec:
-              command:
-                - "nslookup"
-                - "pihole.poos.home"
-                - "127.0.0.1"
-            initialDelaySeconds: 10
-            timeoutSeconds: 2
+            - name: "pihole-bootstrap"
+              mountPath: "/bootstrap"
+              readOnly: true
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - "nslookup"
+          #       - "pi.hole"
+          #       - "127.0.0.1"
+          #   initialDelaySeconds: 10
+          #   timeoutSeconds: 2
+          # readinessProbe:
+          #   exec:
+          #     command:
+          #       - "nslookup"
+          #       - "pi.hole"
+          #       - "127.0.0.1"
+          #   initialDelaySeconds: 10
+          #   timeoutSeconds: 2
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                  - /bootstrap/refresh-ads.sh
+                  - ;
+                  - chown pihole:www-data /etc/pihole/gravity.db
+      volumes:
+        - name: "pihole-bootstrap"
+          configMap:
+            name: pihole-bootstrap
+            defaultMode: 0777
   volumeClaimTemplates:
     - metadata:
         name: pihole-etc
