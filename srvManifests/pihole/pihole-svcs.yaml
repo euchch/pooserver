@@ -46,3 +46,24 @@ spec:
       name: "dhcpu"
   selector:
     app: "pihole"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "pihole-dns-svc-ext"
+  namespace: "pihole"
+spec:
+  ports:
+    - port: 53
+      targetPort: 53
+      protocol: "UDP"
+      name: "dnsu"
+    - port: 53
+      targetPort: 53
+      protocol: "TCP"
+      name: "dnst"
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.253
+  selector:
+    app: "pihole"

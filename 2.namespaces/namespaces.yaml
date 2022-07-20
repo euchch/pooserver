@@ -35,6 +35,15 @@ items:
     kind: Namespace
     metadata:
       labels:
+        kubernetes.io/metadata.name: monitoring
+      name: monitoring
+    spec:
+      finalizers:
+      - kubernetes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
         kubernetes.io/metadata.name: pihole
       name: pihole
     spec:

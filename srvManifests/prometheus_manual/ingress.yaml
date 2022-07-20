@@ -1,0 +1,27 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: prometheus-vs
+  namespace: nginx
+spec:
+  host: prometheus.poos.home
+  routes:
+    - path: /
+      route: prometheus/prometheus-vsr
+
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: prometheus-vsr 
+  namespace: prometheus
+spec:
+  host: prometheus.poos.home
+  upstreams:
+    - name: prometheus 
+      service: prometheus-web-svc
+      port: 80
+  subroutes:
+    - path: /
+      action:
+        pass: prometheus
