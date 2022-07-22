@@ -19,6 +19,9 @@ metadata:
   labels:
     app: pihole
 data:
+  regex-black.list: |-
+    All netflix,^.*.netflix.com$
+
   ad.list: |-
     1,default,https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
     1,porn,https://raw.githubusercontent.com/chadmayfield/pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list
@@ -40,8 +43,48 @@ data:
     1,RPiList phishing,https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/Phishing-Angriffe
     1,blocklistproject phishing,https://raw.githubusercontent.com/blocklistproject/Lists/master/phishing.txt
 
+  update-lists.sh: |-
+    #!/bin/bash
+
+    SOURCE=`dirname ${BASH_SOURCE[0]}`
+    echo "switching to $SOURCE"
+    pushd $SOURCE
+
+    $(pwd)/refresh-ads.sh
+    $(pwd)/blacklist-ads.sh
+
+    popd
+
+  blacklist-ads.sh: |-
+    #!/bin/bash
+
+    printf "\n### blacklist-ads.sh ###\n\n"
+
+    ADLIST_FILE=/bootstrap/regex-black.list
+    SOURCE=`dirname ${BASH_SOURCE[0]}`
+    echo "switching to $SOURCE"
+    pushd $SOURCE
+
+    if [ ! -f "$ADLIST_FILE" ]; then
+      echo "$ADLIST_FILE is missing."
+      popd
+      exit
+    fi
+
+    pihole regex --nuke
+
+    while IFS= read -r line || [[ "$line" ]]; do
+        IFS=',' read -ra my_rec <<< "$line"   # str is read into an array as tokens separated by IFS
+        echo "regex: ${my_rec[1]}, desc: ${my_rec[0]}"
+        pihole regex ${my_rec[1]} --comment ${my_rec[0]}
+    done < $ADLIST_FILE
+
+    popd
+
   refresh-ads.sh: |-
     #!/bin/bash
+
+    printf "\n### refresh-ads.sh ###\n\n"
 
     ADLIST_FILE=/bootstrap/ad.list
     SOURCE=`dirname ${BASH_SOURCE[0]}`
@@ -49,9 +92,9 @@ data:
     pushd $SOURCE
 
     if [ ! -f "$ADLIST_FILE" ]; then
-        echo "$ADLIST_FILE is missing."
-        popd
-        exit
+      echo "$ADLIST_FILE is missing."
+      popd
+      exit
     fi
 
     # Since new pihole server creates dbs/setting files we have to wait, 
@@ -74,3 +117,28 @@ data:
 
     sudo pihole -g
     popd
+
+  livecheck.sh: |-
+    #!/bin/bash
+
+    TESTDOMAIN="pihole.poos.home"
+    TESTSERVER="127.0.0.1"
+    DOMAINIP=`dig ${TESTDOMAIN} @${TESTSERVER} +short`
+    # If something that is not a single IP address is returned - it's an error message
+    CHARCNT=$(wc -m <<< ${DOMAINIP})
+    if [ "${CHARCNT}" -ge 18 ]; then
+      echo "resolution error: ${DOMAINIP}"
+      exit 1
+    fi
+
+  healthcheck.sh: |-
+    #!/bin/bash
+
+    GRAVITYDB='/etc/pihole/gravity.db'
+    DOMAINSQUERY='select count(*) from gravity;'
+    MINBLOCKLIST='100'
+    BLOCKLIST=$(sqlite3 ${GRAVITYDB} "${DOMAINSQUERY}")
+    if [ "${BLOCKLIST}" -le ${MINBLOCKLIST} ]; then 
+      echo 'Blocked domains count is too low' >&2 
+      exit 1
+    fi

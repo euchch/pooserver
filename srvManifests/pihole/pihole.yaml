@@ -8,7 +8,8 @@ metadata:
     app: pihole
 spec:
   serviceName: pihole
-  replicas: 1
+  # Practically kills UI but if update fails for some reason - the old "green" server will still work
+  replicas: 2
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -85,9 +86,13 @@ spec:
               mountPath: "/bootstrap"
               readOnly: true
           livenessProbe:
-            tcpSocket:
-              port: 53
-            initialDelaySeconds: 60
+            exec:
+              # Not the BEST way to test it but since jq is not on image, cannot use "pihole -c -j" for actual data
+              command:
+                  - bash
+                  - -c
+                  - "/bootstrap/livecheck.sh"
+            initialDelaySeconds: 30
             timeoutSeconds: 2
           readinessProbe:
             exec:
@@ -95,13 +100,18 @@ spec:
               command:
                   - bash
                   - -c
-                  - "if [ $(sqlite3 /etc/pihole/gravity.db 'select count(*) from gravity;') -le 100 ]; then echo 'Blocked domains count is too low' >&2 && exit 1 ; fi"
-            initialDelaySeconds: 30
+                  - "/bootstrap/healthcheck.sh"
+            # DB startup update (postStart script) waits 30s, this one needs to be longer 
+            # to allow it to finish before allowing requests - might need to migrate to PID test but I'm lazy :)
+            initialDelaySeconds: 60
             timeoutSeconds: 2
           lifecycle:
             postStart:
               exec:
-                command: ["/bin/bash", "-c", "/bootstrap/refresh-ads.sh > /tmp/startup.log"]
+                command: 
+                  - "/bin/bash"
+                  - "-c"
+                  - "/bootstrap/update-lists.sh > /tmp/startup.log"
       volumes:
         - name: "pihole-bootstrap"
           configMap:
