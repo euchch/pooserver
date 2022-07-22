@@ -4,4 +4,4 @@ helm repo update
 
 # Install nginx
 kubectl create namespace monitoring
-helm install poonginx prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml
+helm install poometheus prometheus-community/prometheus -n monitoring -f values.yaml

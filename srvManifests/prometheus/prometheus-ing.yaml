@@ -7,21 +7,20 @@ spec:
   host: prometheus.poos.home
   routes:
     - path: /
-      route: prometheus/prometheus-vsr
-
+      route: monitoring/prometheus-vsr
 ---
 apiVersion: k8s.nginx.org/v1
 kind: VirtualServerRoute
 metadata:
-  name: prometheus-vsr 
-  namespace: prometheus
+  name: prometheus-vsr
+  namespace: monitoring
 spec:
   host: prometheus.poos.home
   upstreams:
-    - name: prometheus 
-      service: prometheus-web-svc
+    - name: server
+      service: poometheus-prometheus-server
       port: 80
   subroutes:
     - path: /
       action:
-        pass: prometheus
+        pass: server

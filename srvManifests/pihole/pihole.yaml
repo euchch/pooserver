@@ -94,6 +94,8 @@ spec:
                   - "/bootstrap/livecheck.sh"
             initialDelaySeconds: 30
             timeoutSeconds: 2
+            failureThreshold: 2
+            periodSeconds: 30
           readinessProbe:
             exec:
               # Not the BEST way to test it but since jq is not on image, cannot use "pihole -c -j" for actual data
@@ -111,7 +113,7 @@ spec:
                 command: 
                   - "/bin/bash"
                   - "-c"
-                  - "/bootstrap/update-lists.sh > /tmp/startup.log"
+                  - "/bootstrap/init.sh > /tmp/startup.log"
       volumes:
         - name: "pihole-bootstrap"
           configMap:

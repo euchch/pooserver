@@ -19,6 +19,10 @@ metadata:
   labels:
     app: pihole
 data:
+  white.list: |-
+    MS teams events-1,self.events.data.microsoft.com
+    MS teams events-2,teams.events.data.microsoft.com
+
   regex-black.list: |-
     All netflix,^.*.netflix.com$
 
@@ -43,7 +47,7 @@ data:
     1,RPiList phishing,https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/Phishing-Angriffe
     1,blocklistproject phishing,https://raw.githubusercontent.com/blocklistproject/Lists/master/phishing.txt
 
-  update-lists.sh: |-
+  init.sh: |-
     #!/bin/bash
 
     SOURCE=`dirname ${BASH_SOURCE[0]}`
@@ -51,14 +55,42 @@ data:
     pushd $SOURCE
 
     $(pwd)/refresh-ads.sh
-    $(pwd)/blacklist-ads.sh
+    $(pwd)/blacklist-regex.sh
+    $(pwd)/whitelist.sh
 
     popd
 
-  blacklist-ads.sh: |-
+  whitelist.sh: |-
     #!/bin/bash
 
-    printf "\n### blacklist-ads.sh ###\n\n"
+    printf "\n### whitelist.sh ###\n\n"
+
+    ADLIST_FILE=/bootstrap/white.list
+    SOURCE=`dirname ${BASH_SOURCE[0]}`
+    echo "switching to $SOURCE"
+    pushd $SOURCE
+
+    if [ ! -f "$ADLIST_FILE" ]; then
+      echo "$ADLIST_FILE is missing."
+      popd
+      exit
+    fi
+
+    echo "Clearing out whitelist"
+    pihole -w --nuke
+
+    while IFS= read -r line || [[ "$line" ]]; do
+        IFS=',' read -ra my_rec <<< "$line"   # str is read into an array as tokens separated by IFS
+        echo "url: ${my_rec[1]}, desc: ${my_rec[0]}"
+        pihole -w ${my_rec[1]} --comment "${my_rec[0]}"
+    done < $ADLIST_FILE
+
+    popd
+
+  blacklist-regex.sh: |-
+    #!/bin/bash
+
+    printf "\n### blacklist-regex.sh ###\n\n"
 
     ADLIST_FILE=/bootstrap/regex-black.list
     SOURCE=`dirname ${BASH_SOURCE[0]}`
@@ -76,7 +108,7 @@ data:
     while IFS= read -r line || [[ "$line" ]]; do
         IFS=',' read -ra my_rec <<< "$line"   # str is read into an array as tokens separated by IFS
         echo "regex: ${my_rec[1]}, desc: ${my_rec[0]}"
-        pihole regex ${my_rec[1]} --comment ${my_rec[0]}
+        pihole regex ${my_rec[1]} --comment "${my_rec[0]}"
     done < $ADLIST_FILE
 
     popd
@@ -99,9 +131,10 @@ data:
 
     # Since new pihole server creates dbs/setting files we have to wait, 
     # I just don't know WHAT we're waiting for but 30s seems like a sweet spot
+    echo "sleeping..."
     sleep 30
-    # Forcing WAL to avoid DB lock and paralel write requests
-    sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=WAL;"
+    # echo Forcing WAL to avoid DB lock and paralel write requests
+    # sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=WAL;"
 
     sqlite3 /etc/pihole/gravity.db "DELETE FROM adlist"
     sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts', 1, 'default')"
@@ -112,10 +145,18 @@ data:
         sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('${my_rec[2]}', ${my_rec[0]}, '${my_rec[1]}')"
     done < $ADLIST_FILE
 
-    # Undoing WAL for better performances, not a must so we're good if things crash before this one
-    sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=DELETE;"
+    sleep 5
+    # echo Undoing WAL for better performances, not a must so we are good if things crash before this one
+    # sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=DELETE;"
+    # sleep 5
 
     sudo pihole -g
+
+    # sleep 5
+    # echo Undoing WAL for better performances, not a must so we are good if things crash before this one (sometimes first attempt fails)
+    # sqlite3 /etc/pihole/gravity.db "PRAGMA journal_mode=DELETE;"
+    # sleep 5
+
     popd
 
   livecheck.sh: |-

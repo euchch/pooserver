@@ -1,0 +1,26 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: grafana-vs
+  namespace: nginx
+spec:
+  host: grafana.poos.home
+  routes:
+    - path: /
+      route: monitoring/prometheus-vsr
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: grafana-vsr
+  namespace: monitoring
+spec:
+  host: grafana.poos.home
+  upstreams:
+    - name: server
+      service: grafana
+      port: 80
+  subroutes:
+    - path: /
+      action:
+        pass: server
