@@ -4,4 +4,5 @@ helm repo update
 
 # Install metallb
 kubectl create namespace portainer
+kns portainer
 helm install -n portainer portainer portainer/portainer --set service.type=ClusterIP

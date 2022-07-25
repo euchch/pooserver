@@ -4,4 +4,5 @@ helm repo update
 
 # Install nginx
 kubectl create namespace monitoring
+kns monitoring
 helm install grafana grafana/grafana -n monitoring -f values.yaml

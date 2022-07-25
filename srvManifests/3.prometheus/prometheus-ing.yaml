@@ -8,6 +8,7 @@ spec:
   routes:
     - path: /
       route: monitoring/prometheus-vsr
+
 ---
 apiVersion: k8s.nginx.org/v1
 kind: VirtualServerRoute

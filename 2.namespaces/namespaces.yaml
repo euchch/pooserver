@@ -26,15 +26,6 @@ items:
     kind: Namespace
     metadata:
       labels:
-        kubernetes.io/metadata.name: portainer
-      name: portainer
-    spec:
-      finalizers:
-      - kubernetes
-  - apiVersion: v1
-    kind: Namespace
-    metadata:
-      labels:
         kubernetes.io/metadata.name: monitoring
       name: monitoring
     spec:

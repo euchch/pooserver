@@ -7,7 +7,7 @@ spec:
   host: grafana.poos.home
   routes:
     - path: /
-      route: monitoring/prometheus-vsr
+      route: monitoring/grafana-vsr
 ---
 apiVersion: k8s.nginx.org/v1
 kind: VirtualServerRoute
