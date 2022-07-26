@@ -3,7 +3,9 @@
 PHQUERY='{.items[?(@.metadata.labels.app=="pihole")].metadata.name}'
 NS=pihole
 phServers=$(kubectl get pods -o=jsonpath="${PHQUERY}")
-echo "hosts list: ${phServers}"
+INITCMD="/bootstrap/init.sh"
 
-while IFS= ${phServers} || [[ "$server" ]]; do
+for server in ${phServers}; do
+    echo "Running $INITCMD on pod $server"
+    kubectl exec $server -- $INITCMD
 done

@@ -35,7 +35,7 @@ spec:
       containers:
         - name: "pihole"
           image: "pihole/pihole:2022.07"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 53
               protocol: "UDP"

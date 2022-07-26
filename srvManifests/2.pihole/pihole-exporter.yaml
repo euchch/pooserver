@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-exporter
+  namespace: "pihole"
+  labels:
+    app.kubernetes.io/name: pihole
+    app: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "pihole-exporter"
+      app.kubernetes.io/instance: "pihole-exporter"
+  template:
+    metadata:
+      labels:
+        app: "pihole-exporter"
+        app.kubernetes.io/name: "pihole-exporter"
+        app.kubernetes.io/instance: "pihole-exporter"
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: "pihole-exporter"
+          image: "ekofr/pihole-exporter:v0.3.0"
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name:   "TZ"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: TZ
+            - name:   "PIHOLE_PROTOCOL"
+              value:  "http"
+            - name:   "PIHOLE_PORT"
+              value:  "80"
+            - name:   "PORT"
+              value:  "9617"
+            - name:   "PIHOLE_HOSTNAME"
+              value:  "pihole-web-svc.pihole.svc.cluster.local"
+            - name:   "PIHOLE_PASSWORD"
+              valueFrom:
+                configMapKeyRef:
+                  name: pihole-config
+                  key: WEBPASSWORD
+          ports:
+            - containerPort: 9617
+              protocol: "TCP"
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 9617
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9617
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

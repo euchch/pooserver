@@ -67,3 +67,20 @@ spec:
   loadBalancerIP: 192.168.1.253
   selector:
     app: "pihole"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "pihole-exporter"
+  namespace: "pihole"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9617
+      targetPort: 9617
+      protocol: TCP
+      name: exporter-port
+  selector:
+    app.kubernetes.io/name: pihole-exporter
+    app.kubernetes.io/instance: pihole-exporter
