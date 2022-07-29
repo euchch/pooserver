@@ -19,6 +19,7 @@ data:
     local-data: "pi.hole                  IN       A        192.168.1.254"
     local-data: "grafana.poos.home        IN       A        192.168.1.254"
     local-data: "prometheus.poos.home     IN       A        192.168.1.254"
+    local-data: "longhorn.poos.home       IN       A        192.168.1.254"
     local-data: "router.poos.home         IN       A        192.168.1.1"
     # PTR Record
     #local-data-ptr: "192.168.1.1 somecomputer.local."
@@ -27,6 +28,7 @@ data:
     local-data-ptr: "192.168.1.254 pihole.poos.home"
     local-data-ptr: "192.168.1.254 grafana.poos.home"
     local-data-ptr: "192.168.1.254 prometheus.poos.home"
+    local-data-ptr: "192.168.1.254 longhorn.poos.home"
     local-data-ptr: "192.168.1.1  router.poos.home"
 
     # record used for the liveness/readiness probes

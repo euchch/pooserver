@@ -10,6 +10,14 @@
     systemctl enable nfs-common
     systemctl enable nfs-kernel-server
 
+# K3S installation process:
+    # Server install: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init --write-kubeconfig-mode 644 —-disable servicelb" sh -
+    # Client install: curl -sfL https://get.k3s.io | K3S_URL=https://<master ip>:6443 K3S_TOKEN=<node_token> sh -
+
+# Test longhorn prerequisits:
+    apk add bash jq open-iscsi findmnt lsblk
+    curl -sSfL https://raw.githubusercontent.com/longhorn/longhorn/v1.2.2/scripts/environment_check.sh | bash
+
 # Setup host folders
     mkdir -p /srv/shared
 
@@ -34,3 +42,16 @@
     fi
     chmod +x /mnt/srv/shared/client-bootstrap.sh
     /mnt/srv/shared/client-bootstrap.sh
+
+# If using CIFS share:
+    apk add cifs-utils
+
+    cat << EOF > /root/.smb-creds
+    user=poo3s
+    password=**redacted**
+    EOF
+
+    echo "//192.168.1.91/Poo3s/Shared     /mnt/srv/shared cifs    credentials=/root/.smb-creds,iocharset=utf8,noperm,_netdev 0 0” >> /etc/fstab
+    echo "//192.168.1.91/Poo3s/Local/k3s  /mnt/srv/local  cifs    credentials=/root/.smb-creds,iocharset=utf8,noperm,_netdev 0 0” >> /etc/fstab
+    chmod 600 /root/.smb-creds
+    vim /etc/fstab

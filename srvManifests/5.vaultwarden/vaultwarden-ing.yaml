@@ -1,0 +1,35 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: vaultwarden-vs
+  namespace: nginx
+spec:
+  host: vaultwarden.poos.home
+  routes:
+    - path: /
+      route: vaultwarden/vaultwarden-vsr
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: vaultwarden-vsr
+  namespace: vaultwarden
+spec:
+  host: vaultwarden.poos.home
+  upstreams:
+    - name: server
+      service: pooltwarden-vaultwarden
+      port: 80
+    - name: websocket
+      service: pooltwarden-vaultwarden
+      port: 3012
+  subroutes:
+    - path: /
+      action:
+        pass: server
+    - path: /notifications/hub/negotiate
+      action:
+        pass: server
+    - path: /notifications/hub
+      action:
+        pass: websocket

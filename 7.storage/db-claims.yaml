@@ -1,0 +1,14 @@
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   labels:
+#     app: postgres
+#   name: vaultwarden-pvc
+#   namespace: vaultwarden
+# spec:
+#   storageClassName: manual
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 100M

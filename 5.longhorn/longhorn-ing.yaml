@@ -1,0 +1,26 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: longhorn-vs
+  namespace: nginx
+spec:
+  host: longhorn.poos.home
+  routes:
+    - path: /
+      route: longhorn/longhorn-vsr
+---
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServerRoute
+metadata:
+  name: longhorn-vsr
+  namespace: longhorn
+spec:
+  host: longhorn.poos.home
+  upstreams:
+    - name: server
+      service: longhorn-frontend
+      port: 80
+  subroutes:
+    - path: /
+      action:
+        pass: server

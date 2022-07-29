@@ -1452,6 +1452,14 @@ serverFiles:
           - targets: 
             - pihole-exporter.pihole.svc.cluster.local:9617
 
+      - job_name: cert-mgr
+        static_configs:
+          - targets:
+            - poos-cmgr-cert-manager.cert-manager.svc.cluster.local:9402
+        metrics_path: /metrics
+        params:
+          module: [http_2xx]
+
       - job_name: prometheus
         static_configs:
           - targets:

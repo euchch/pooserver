@@ -17,6 +17,15 @@ items:
     kind: Namespace
     metadata:
       labels:
+        kubernetes.io/metadata.name: longhorn
+      name: longhorn
+    spec:
+      finalizers:
+      - kubernetes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
         kubernetes.io/metadata.name: nginx
       name: nginx
     spec:
@@ -46,6 +55,24 @@ items:
       labels:
         kubernetes.io/metadata.name: unbound
       name: unbound
+    spec:
+      finalizers:
+      - kubernetes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
+        kubernetes.io/metadata.name: vaultwarden
+      name: vaultwarden
+    spec:
+      finalizers:
+      - kubernetes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
+        kubernetes.io/metadata.name: cert-manager
+      name: cert-manager
     spec:
       finalizers:
       - kubernetes
