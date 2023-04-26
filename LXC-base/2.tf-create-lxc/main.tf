@@ -18,7 +18,7 @@ resource "proxmox_virtual_environment_container" "master_container" {
   unprivileged = true
 
   initialization {
-    hostname = "terraform-provider-proxmox-alpine-master-container"
+    hostname = "poove2-poo3s-master-1"
 
     ip_config {
       ipv4 {
@@ -63,7 +63,7 @@ resource "proxmox_virtual_environment_container" "slave_container" {
   unprivileged = true
 
   initialization {
-    hostname = "terraform-provider-proxmox-alpine-slave-container"
+    hostname = "poove2-poo3s-worker-1"
 
     ip_config {
       ipv4 {
