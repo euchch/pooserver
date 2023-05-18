@@ -33,7 +33,7 @@ WORKER_IP_ADDRESS=$(jq -r --arg hostname "$HOSTNAME" '.resources[].instances[] |
 WORKER_IP_ADDRESS=$(echo "$WORKER_IP_ADDRESS" | cut -d '/' -f 1)
 
 # Write the content to the file
-cat > inventory/poos3s/hosts.ini << EOF
+cat > inventory/my-cluster/hosts.ini << EOF
 [master]
 ${MASTER_IP_ADDRESS} Ansible_ssh_private_key_file=master_container_private_key.pem ansible_user=root ansible_python_interpreter=/usr/bin/python
 [node]
@@ -44,4 +44,4 @@ master
 node
 EOF
 
-# Ansible-playbook site.yml -i inventory/poos3s/hosts.ini -u root
+# Ansible-playbook site.yml -i inventory/my-cluster/hosts.ini -u root

@@ -1,0 +1,54 @@
+- name: Install curl
+  apk:
+    name: curl
+    state: present
+
+- name: Add cgroup to /etc/fstab
+  lineinfile:
+    path: /etc/fstab
+    line: 'cgroup /sys/fs/cgroup cgroup defaults 0 0'
+
+- name: Create /etc/cgconfig.conf
+  copy:
+    content: |
+      mount {
+        cpuacct = /cgroup/cpuacct;
+        memory = /cgroup/memory;
+        devices = /cgroup/devices;
+        freezer = /cgroup/freezer;
+        net_cls = /cgroup/net_cls;
+        blkio = /cgroup/blkio;
+        cpuset = /cgroup/cpuset;
+        cpu = /cgroup/cpu;
+      }
+    dest: /etc/cgconfig.conf
+
+# - name: Update default_kernel_opts in /etc/update-extlinux.conf
+#   replace:
+#     path: /etc/update-extlinux.conf
+#     regexp: 'default_kernel_opts="pax_nouderef quiet rootfstype=ext4"'
+#     replace: 'default_kernel_opts="pax_nouderef quiet rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory"'
+
+# - name: Run update-extlinux
+#   command: update-extlinux
+
+- name: Install cni-plugins
+  apk:
+    name: cni-plugins
+    state: present
+    repository: http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+- name: Add /usr/share/cni-plugins/bin to PATH
+  lineinfile:
+    path: /etc/profile.d/cni.sh
+    line: 'export PATH=$PATH:/usr/share/cni-plugins/bin'
+    create: yes
+    mode: '0755'
+
+- name: Install iptables
+  apk:
+    name: iptables
+    state: present
+    
+- name: Reboot system
+  reboot:

@@ -1,0 +1,21 @@
+---
+
+- hosts: k3s_cluster
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: reset
+
+# - hosts: db 
+#   gather_facts: yes
+#   become: yes
+#   tasks:
+#   - name: Drop table kine from schema public
+#     community.postgresql.postgresql_table:
+#       name: public.kine
+#       state: absent
+#       ssl_mode: disable
+#         #login_host: "10.10.10.24"
+#       login_host: "{{ hostvars[groups['db'][0]]['ansible_default_ipv4']['address'] }}"
+#       login_password: password
+#       db: k3s_demo

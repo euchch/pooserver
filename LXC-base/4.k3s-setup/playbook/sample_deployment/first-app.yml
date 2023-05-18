@@ -1,0 +1,62 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: first-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: selfsigned-cluster-issuer
+spec:
+  tls:
+    - hosts:
+      - test.fn2.run
+      secretName: test-fn2-run-prod-tls
+  rules:
+  - host: test.fn2.run
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: first-app-svc
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: first-app-svc
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: first-app 
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: first-app 
+  template:
+    metadata:
+      labels:
+        app: first-app 
+    spec:
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.8
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MESSAGE
+          value: Hello from the first deployment!
+

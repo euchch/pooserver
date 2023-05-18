@@ -1,0 +1,21 @@
+- name: Download Proxmox certificate
+  fetch:
+    src: /etc/pve/pve-root-ca.pem
+    dest: /tmp/pve-root-ca-{{ item }}.pem
+    flat: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['proxmox'] }}"
+  become: true
+
+- name: Add Proxmox certificate to macOS keychain
+  shell: security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/pve-root-ca-{{ item }}.pem
+  delegate_to: localhost
+  loop: "{{ groups['proxmox'] }}"
+  become: true
+
+- name: Delete downloaded Proxmox certificate
+  file:
+    path: /tmp/pve-root-ca-{{ item }}.pem
+    state: absent
+  delegate_to: localhost
+  loop: "{{ groups['proxmox'] }}"

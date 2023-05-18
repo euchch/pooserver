@@ -1,0 +1,82 @@
+---
+- name: Install curl
+  apk:
+    name: curl
+    state: present
+    update_cache: yes
+  when: ansible_facts['distribution'] == "Alpine"
+
+- name: Add cgroup to fstab
+  lineinfile:
+    path: /etc/fstab
+    line: 'cgroup /sys/fs/cgroup cgroup defaults 0 0'
+
+- name: Create cgconfig.conf
+  copy:
+    content: |
+      mount {
+        cpuacct = /cgroup/cpuacct;
+        memory = /cgroup/memory;
+        devices = /cgroup/devices;
+        freezer = /cgroup/freezer;
+        net_cls = /cgroup/net_cls;
+        blkio = /cgroup/blkio;
+        cpuset = /cgroup/cpuset;
+        cpu = /cgroup/cpu;
+      }
+    dest: /etc/cgconfig.conf
+
+# - name: Create /boot directory
+#   file:
+#     path: /boot
+#     state: directory
+
+# - name: Install syslinux package
+#   apk:
+#     name: syslinux
+#     state: present
+
+# - name: Install EXTLINUX binaries
+#   command: extlinux --install /boot
+
+# - name: Update default_kernel_opts in update-extlinux.conf
+#   replace:
+#     path: /etc/update-extlinux.conf
+#     regexp: 'default_kernel_opts="pax_nouderef quiet rootfstype=ext4"'
+#     replace: 'default_kernel_opts="pax_nouderef quiet rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory"'
+
+# - name: Run update-extlinux
+#   command: update-extlinux
+
+# - name: Reboot system
+#   reboot:
+
+- name: Install cni-plugins from edge/community repository
+  apk:
+    name: cni-plugins
+    state: present
+    repository: http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+- name: Add cni-plugins to PATH
+  lineinfile:
+    path: /etc/profile.d/cni.sh
+    line: 'export PATH=$PATH:/usr/share/cni-plugins/bin'
+    create: yes
+
+- name: Install iptables
+  apk:
+    name: iptables
+    state: present
+
+- name: Download k3s setup script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s_setup
+    mode: 0755
+
+- name: Update path for rc-update
+  ansible.builtin.replace:
+    path: /tmp/k3s_setup
+    regexp: 'rc-update'
+    replace: '/sbin/rc-update'
+  when: ansible_facts['distribution'] == "Alpine"

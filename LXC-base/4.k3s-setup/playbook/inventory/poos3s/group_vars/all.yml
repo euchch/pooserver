@@ -1,0 +1,26 @@
+---
+k3s_version: v1.26.4+k3s1
+
+metallb_version: v0.13.9
+cert_manager_version: v1.6.0
+
+ansible_user: root
+master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+
+vip_address: 192.168.1.230
+vip_interface: eth0
+
+metallb_addresses: 192.168.1.250-192.168.1.254
+
+# db_url: mysql://{{ db_user }}:{{ db_password }}@192.168.1.91:3306/k3s_demo
+systemd_dir: /etc/systemd/system
+
+extra_server_args: "--tls-san {{ vip_address }} --disable servicelb --disable traefik --node-taint node-role.kubernetes.io/master=true:NoSchedule " # --write-kubeconfig-mode=644" # --datastore-endpoint {{ db_url }}
+extra_agent_args: ""
+copy_kubeconfig: true
+
+ansible_ssh_private_key_file: /home/neo/.ssh/id_ed25519
+
+argocd: false
+argocd_service_type: LoadBalancer
+dns_servers: []

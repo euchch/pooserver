@@ -1,17 +1,18 @@
 cat <<EOF > ~/answers.txt
 KEYMAPOPTS="us us"
-HOSTNAMEOPTS="-n myhostname"
+HOSTNAMEOPTS="-n poove2-poo3s-master-1"
+# HOSTNAMEOPTS="-n poove2-poo3s-worker-1"
 INTERFACESOPTS="auto lo
 iface lo inet loopback
 
 auto veth0
 iface veth0 inet static
-    address 192.168.1.88/24
-    # address 192.168.1.87/24
+    # address 192.168.1.88/24
+    address 192.168.1.87/24
     gateway 192.168.1.1
 "
-DNSOPTS="-d poove2-poo3s-worker-1.poos.home -n 192.168.1.1"
-# DNSOPTS="-d poove2-poo3s-master-1.poos.home -n 192.168.1.1"
+DNSOPTS="-d poove2-poo3s-master-1.poos.home -n 192.168.1.1"
+# DNSOPTS="-d poove2-poo3s-worker-1.poos.home -n 192.168.1.1"
 TIMEZONEOPTS="-z America/New_York"
 PROXYOPTS="none"
 APKREPOSOPTS="-r"
@@ -20,7 +21,14 @@ NTPOPTS="-c openntpd"
 DISKOPTS="-m sys /dev/sda"
 EOF
 
-setup-alpine -f answers.txt
+setup-alpine -e -f answers.txt
+
+if ! grep -q "nameserver 192.168.1.1" /etc/resolv.conf; then
+    echo "nameserver 192.168.1.1" >> /etc/resolv.conf
+fi
+
+apk add --update --no-cache python3
+ln -sf python3 /usr/bin/python
 
 cat <<EOF > /etc/rc.local
 #!/bin/sh -e

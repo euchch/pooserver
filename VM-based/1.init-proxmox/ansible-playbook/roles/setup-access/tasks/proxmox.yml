@@ -1,0 +1,13 @@
+---
+
+# - name: Set authorized key
+#   authorized_key:
+#     user: root
+#     state: present
+#     key: "{{ lookup('file', ssh_key_path + '.pub') }}"
+
+- name: Ensure SSH key is present on remote server
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', ssh_key_path) + '.pub' }}"

@@ -1,0 +1,18 @@
+---
+
+- name: Generate SSH key
+  openssh_keypair:
+    path: "{{ ssh_key_path }}"
+    state: present
+
+- name: Copy SSH key to remote server using ssh-copy-id
+  local_action: command ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ item }}
+  loop: "{{ groups['proxmox'] }}"
+
+- name: Update /etc/hosts with proxmox hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ hostvars[item]['ansible_host'] }} {{ item.split('.')[0] }} {{ item }}"
+    state: present
+  loop: "{{ groups['proxmox'] }}"
+  become: true

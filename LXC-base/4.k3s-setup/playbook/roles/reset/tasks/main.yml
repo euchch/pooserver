@@ -1,0 +1,20 @@
+---
+- name: Kill all service
+  shell: "/usr/local/bin/k3s-killall.sh"
+
+- name: Uninstall k3s on master
+  shell: "/usr/local/bin/k3s-uninstall.sh"
+  when: "'master' in group_names"
+
+- name: Uninstall k3s on worker
+  shell: "/usr/local/bin/k3s-agent-uninstall.sh"
+  when: "'worker' in group_names"
+
+- name: Reboot
+  reboot:
+    msg: "Reboot after uninstall k3s"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime

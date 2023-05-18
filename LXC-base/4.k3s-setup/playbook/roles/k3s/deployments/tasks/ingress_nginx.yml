@@ -1,0 +1,22 @@
+---
+
+- name: Download ingress nginx manifest
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.4/deploy/static/provider/baremetal/deploy.yaml
+    dest: /tmp/ingress-nginx.yml
+
+- name: Change Deployment to DaemonSet 
+  ansible.builtin.replace:
+    path: /tmp/ingress-nginx.yml
+    regexp: 'kind: Deployment'
+    replace: 'kind: DaemonSet'
+
+- name: Change NodePort to LoadBalancer
+  ansible.builtin.replace:
+    path: /tmp/ingress-nginx.yml
+    regexp: 'type: NodePort'
+    replace: 'type: LoadBalancer'
+
+- name: Apply the manifest
+  shell: >
+    /usr/local/bin/kubectl apply -f /tmp/ingress-nginx.yml

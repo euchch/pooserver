@@ -1,0 +1,2 @@
+- join worker node using KUBE-VIP IP instead of node01
+

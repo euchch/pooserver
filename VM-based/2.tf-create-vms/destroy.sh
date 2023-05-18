@@ -1,0 +1,1 @@
+terraform destroy -auto-approve --var-file secrets.tfvars --var-file variables.tfvars

@@ -1,0 +1,24 @@
+---
+
+- name: Create namespace
+  shell: >
+    /usr/local/bin/kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/namespace.yaml
+
+- name: Deploy metallb daemonset
+  shell: >
+    /usr/local/bin/kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/metallb.yaml
+
+- name: Create secret
+  shell: >
+    /usr/local/bin/kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+
+- name: Create metallb config map
+  template:
+    src: "metallb-config-map.yaml.j2"
+    dest: "/tmp/config-map.yaml"
+
+- name: Apply config map
+  shell: >
+    /usr/local/bin/kubectl apply -f /tmp/config-map.yaml
+
+

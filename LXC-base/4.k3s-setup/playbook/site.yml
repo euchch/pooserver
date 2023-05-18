@@ -1,0 +1,62 @@
+---
+
+- hosts: k3s_cluster
+  gather_facts: true
+  become: true
+  roles:
+    - role: prereq
+
+- hosts: master[0]
+  become: true
+  roles:
+    - role: k3s/main-master
+
+# - hosts: master[1:]
+#   become: true
+#   roles:
+#     - role: k3s/sub-master
+
+- hosts: worker
+  become: true
+  roles:
+    - role: k3s/worker
+
+- hosts: master[0]
+  become: true
+  tasks:
+    - name: Install MetalLB
+      include_role:
+        name: k3s/deployments
+        tasks_from: metallb
+
+    - name: Install Ingress Nginx
+      include_role:
+        name: k3s/deployments
+        tasks_from: ingress_nginx
+
+#     - name: Install cert-manager
+#       include_role:
+#         name: k3s/deployments
+#         tasks_from: cert-manager
+# 
+    - name: Copy config file to user home directory
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~{{ ansible_user }}/.kube/config
+        remote_src: yes
+        owner: "{{ ansible_user }}"
+        mode: "u=rw,g=,o="
+
+    - name: Replace https://localhost:6443 by https://master-ip:6443
+      command: >-
+        /usr/local/bin/kubectl config set-cluster default
+          --server=https://{{ vip_address }}:6443
+          --kubeconfig ~{{ ansible_user }}/.kube/config
+      changed_when: true
+
+    - name: Copy config file to dev machine
+      fetch:
+        src: ~{{ ansible_user }}/.kube/config
+        dest: ./k3s-config.yaml
+        flat: yes
+

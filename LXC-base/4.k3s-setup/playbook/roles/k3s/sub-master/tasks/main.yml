@@ -1,0 +1,6 @@
+---
+- name: Load secrets
+  include_vars: secrets.yml
+
+- name: Join main master
+  shell: INSTALL_K3S_VERSION={{ k3s_version }} K3S_TOKEN={{ hostvars[groups['master'][0]]['token'] }} /tmp/k3s_setup {{ extra_server_args | default("") }} --server https://{{ vip_address }}:6443  

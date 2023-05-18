@@ -1,0 +1,1 @@
+terraform apply -auto-approve --var-file variables.tfvars --var-file secrets.tfvars 

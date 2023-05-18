@@ -1,0 +1,20 @@
+---
+
+- name: Remove Proxmox enterprise repository
+  file:
+    path: /etc/apt/sources.list.d/pve.enterprise.list
+    state: absent
+- name: Manually Remove Proxmox enterprise repository
+  lineinfile:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+    regexp: '^deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise'
+    line: '# deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise'
+    state: present
+- name: Add Proxmox no-subscription repository
+  apt_repository:
+    repo: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
+    state: present
+- name: Update system
+  apt:
+    update_cache: yes
+    upgrade: full

@@ -1,0 +1,14 @@
+---
+
+- name: Create manifests folder
+  shell: mkdir -p /var/lib/rancher/k3s/server/manifests/
+
+- name: Template rbac.yaml file
+  template:
+    src: "kube-vip-rbac.yaml.j2"
+    dest: "/var/lib/rancher/k3s/server/manifests/kube-vip-rbac.yaml"
+
+- name: Template kube-vip.yaml daemonset
+  template:
+    src: "kube-vip.yaml.j2"
+    dest: "/var/lib/rancher/k3s/server/manifests/kube-vip.yaml"

@@ -1,0 +1,23 @@
+---
+
+- name: Setup access - Local
+  hosts: local
+  tasks:
+    - name: Include local tasks
+      include_role:
+        name: setup-access
+        tasks_from: local
+
+- name: Enable Certs
+  hosts: local
+  tasks:
+    - name: Import Proxmox Certs
+      include_role:
+        name: enable-certs
+
+- name: Configure Proxmox
+  hosts: proxmox
+  tasks:
+    - name: Configure proxmox
+      include_role:
+        name: configure-proxmox
